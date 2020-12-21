@@ -9,7 +9,7 @@ import cv2
 import os
 
 
-def image_to_feature_vector(image, size=(100, 100)):
+def image_to_feature_vector(image, size=(300, 300)):
 	# resize the image to a fixed size, then flatten the image into
 	# a list of raw pixel intensities
 	return cv2.resize(image, size).flatten()
@@ -117,3 +117,23 @@ acc = model.score(test_features, test_labels)
 print("[INFO] histogram accuracy: {:.2f}%".format(acc * 100))
 
 model.predict_proba(test_features)
+
+
+from sklearn.model_selection import LeaveOneOut
+loo = LeaveOneOut()
+loo.get_n_splits(rawImages)
+
+
+model = KNeighborsClassifier(n_neighbors=1,
+	n_jobs=1)
+model.fit(trainRI, trainRL)
+acc = model.score(testRI, testRL)
+
+list_acc = []
+for train_index, test_index in loo.split(rawImages):
+	X_train, X_test = rawImages[train_index], rawImages[test_index]
+	y_train, y_test = labels[train_index], labels[test_index]
+	model = KNeighborsClassifier(n_neighbors=1,n_jobs=1)
+	model.fit(X_train, y_train)
+	acc = model.score(X_test, y_test)
+	list_acc.append(acc)
